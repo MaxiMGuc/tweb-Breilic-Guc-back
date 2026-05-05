@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\eAviaSales.BusinessLogic\eAviaSales.BusinessLogic.csproj" />
+    <ProjectReference Include="..\eAviaSales.Data\eAviaSales.Data.csproj" />
+    <ProjectReference Include="..\eAviaSales.Domains\eAviaSales.Domains.csproj" />
+  </ItemGroup>
+
+</Project>
