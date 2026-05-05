@@ -1,5 +1,4 @@
-using eAviaSales.BusinessLogic.Functions.Flights;
-using eAviaSales.Data;
+using eAviaSales.BusinessLogic.Interface;
 using eAviaSales.Domains.Models.Flight;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,24 +8,24 @@ namespace eAviaSales.Api.Controller;
 [ApiController]
 public class FlightController : ControllerBase
 {
-    private readonly FlightFlow _flightFlow;
+    private readonly IFlightActions _flightActions;
 
-    public FlightController(AviaSalesDbContext dbContext)
+    public FlightController(IFlightActions flightActions)
     {
-        _flightFlow = new FlightFlow(dbContext);
+        _flightActions = flightActions;
     }
 
     [HttpPost("search")]
     public async Task<IActionResult> SearchFlights([FromBody] FlightSearchRequest request)
     {
-        var flights = await _flightFlow.SearchFlightsActionAsync(request);
+        var flights = await _flightActions.SearchFlightsActionAsync(request);
         return Ok(flights);
     }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetFlightById(int id)
     {
-        var flight = await _flightFlow.GetFlightByIdActionAsync(id);
+        var flight = await _flightActions.GetFlightByIdActionAsync(id);
         if (flight is null)
         {
             return NotFound(new { Message = $"Flight with ID {id} not found." });
