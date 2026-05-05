@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\eAviaSales.BusinessLogic\eAviaSales.BusinessLogic.csproj" />
     <ProjectReference Include="..\eAviaSales.Data\eAviaSales.Data.csproj" />
     <ProjectReference Include="..\eAviaSales.Domains\eAviaSales.Domains.csproj" />
