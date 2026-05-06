@@ -16,14 +16,14 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] UserAuthRequest request)
+    public ActionResult<UserAuthResponse> Login([FromBody] UserAuthRequest request)
     {
-        var token = _authActions.LoginActionFlow(request);
-        if (string.IsNullOrWhiteSpace(token))
+        var response = _authActions.LoginActionFlow(request);
+        if (response is null)
         {
             return Unauthorized(new { Message = "Invalid credentials payload." });
         }
 
-        return Ok(new { Token = token });
+        return Ok(response);
     }
 }

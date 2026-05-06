@@ -6,13 +6,22 @@ namespace eAviaSales.BusinessLogic.Functions.Auth;
 
 public class AuthFlow : AuthActions, IAuthActions
 {
-    public string? LoginActionFlow(UserAuthRequest auth)
+    public UserAuthResponse? LoginActionFlow(UserAuthRequest auth)
     {
         if (!ValidateLogin(auth))
         {
             return null;
         }
 
-        return GenerateToken(auth);
+        var token = GenerateToken(auth);
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return null;
+        }
+
+        return new UserAuthResponse
+        {
+            Token = token
+        };
     }
 }

@@ -16,10 +16,13 @@ public class FlightController : ControllerBase
     }
 
     [HttpPost("search")]
-    public async Task<IActionResult> SearchFlights([FromBody] FlightSearchRequest request)
+    public async Task<ActionResult<FlightSearchResponse>> SearchFlights([FromBody] FlightSearchRequest request)
     {
         var flights = await _flightActions.SearchFlightsActionAsync(request);
-        return Ok(flights);
+        return Ok(new FlightSearchResponse
+        {
+            Flights = flights
+        });
     }
 
     [HttpGet("{id:int}")]
