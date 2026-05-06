@@ -6,6 +6,7 @@ namespace eAviaSales.Api.Controller;
 [ApiController]
 public class HealthController : ControllerBase
 {
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [HttpGet]
     public IActionResult Health()
     {
