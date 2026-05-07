@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# retired project
+eUseControl.Api/
+
 # User-specific files
 *.rsuser
 *.suo
