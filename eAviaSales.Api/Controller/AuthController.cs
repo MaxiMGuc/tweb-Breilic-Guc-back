@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace eAviaSales.Api.Controller;
 
 [Route("api/auth")]
-[ApiController]
-public class AuthController : ControllerBase
+public class AuthController : ApiControllerBase
 {
     private readonly IAuthActions _authActions;
     private readonly ILogger<AuthController> _logger;
@@ -33,5 +32,23 @@ public class AuthController : ControllerBase
 
         _logger.LogInformation("Login succeeded for user {Login}", request.Login);
         return Ok(response);
+    }
+
+    [HttpPost("register")]
+    public IActionResult Register()
+    {
+        return NotImplementedResponse("Register");
+    }
+
+    [HttpPost("refresh")]
+    public IActionResult RefreshToken()
+    {
+        return NotImplementedResponse("Refresh token");
+    }
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        return NotImplementedResponse("Logout");
     }
 }
