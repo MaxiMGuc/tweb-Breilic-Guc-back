@@ -2,7 +2,10 @@ using eAviaSales.Data;
 using eAviaSales.BusinessLogic.Functions.Auth;
 using eAviaSales.BusinessLogic.Functions.Flights;
 using eAviaSales.BusinessLogic.Interface;
-using Microsoft.AspNetCore.Diagnostics;
+using eAviaSales.Api.Contracts.Common;
+using eAviaSales.Api.Contracts.Errors;
+using eAviaSales.Api.Extensions;
+using eAviaSales.Api.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,14 +16,20 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
-        var validationProblem = new ValidationProblemDetails(context.ModelState)
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Validation failed",
-            Type = "https://httpstatuses.com/400"
-        };
+        var validationErrors = context.ModelState
+            .Where(static pair => pair.Value?.Errors.Count > 0)
+            .ToDictionary(
+                static pair => pair.Key,
+                static pair => pair.Value!.Errors.Select(error => error.ErrorMessage).ToArray());
 
-        return new BadRequestObjectResult(validationProblem);
+        var response = ApiResponse<object>.Fail(new ApiError
+        {
+            Code = ApiErrorCodes.ValidationFailed,
+            Message = "Validation failed",
+            Details = validationErrors
+        }, context.HttpContext.TraceIdentifier);
+
+        return new BadRequestObjectResult(response);
     };
 });
 builder.Services.AddEndpointsApiExplorer();
@@ -32,27 +41,11 @@ builder.Services.AddDbContext<AviaSalesDbContext>(options =>
 });
 builder.Services.AddScoped<IAuthActions, AuthFlow>();
 builder.Services.AddScoped<IFlightActions, FlightFlow>();
+builder.Services.AddTicketingModuleScaffolding();
 
 var app = builder.Build();
 
-app.UseExceptionHandler(errorApp =>
-{
-    errorApp.Run(async context =>
-    {
-        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
-        var problem = new ProblemDetails
-        {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "An unexpected server error occurred.",
-            Type = "https://httpstatuses.com/500",
-            Detail = app.Environment.IsDevelopment() ? exception?.Message : null
-        };
-
-        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        context.Response.ContentType = "application/problem+json";
-        await context.Response.WriteAsJsonAsync(problem);
-    });
-});
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
