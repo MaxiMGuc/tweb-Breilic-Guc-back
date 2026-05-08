@@ -79,21 +79,52 @@ public sealed class EventsController : ApiControllerBase
     }
 
     [HttpGet("{eventId:int}/availability")]
-    public IActionResult GetAvailability(int eventId)
+    [ProducesResponseType(typeof(ApiResponse<EventAvailabilityResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<EventAvailabilityResponse>>> GetAvailability(int eventId)
     {
-        return NotImplementedResponse($"Event availability {eventId}");
+        var flight = await _flightActions.GetFlightByIdActionAsync(eventId);
+        if (flight is null)
+        {
+            return NotFound(new { Message = $"Event with ID {eventId} not found." });
+        }
+
+        var response = MapToAvailability(flight);
+        return OkResponse(response);
     }
 
     [HttpGet("{eventId:int}/seat-map")]
-    public IActionResult GetSeatMap(int eventId)
+    [ProducesResponseType(typeof(ApiResponse<EventSeatMapResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<EventSeatMapResponse>>> GetSeatMap(int eventId)
     {
-        return NotImplementedResponse($"Event seat map {eventId}");
+        var flight = await _flightActions.GetFlightByIdActionAsync(eventId);
+        if (flight is null)
+        {
+            return NotFound(new { Message = $"Event with ID {eventId} not found." });
+        }
+
+        var response = BuildSeatMap(flight);
+        return OkResponse(response);
     }
 
     [HttpGet("{eventId:int}/seats")]
-    public IActionResult GetSeats(int eventId)
+    [ProducesResponseType(typeof(ApiResponse<EventSeatsResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<EventSeatsResponse>>> GetSeats(int eventId)
     {
-        return NotImplementedResponse($"Event seats {eventId}");
+        var flight = await _flightActions.GetFlightByIdActionAsync(eventId);
+        if (flight is null)
+        {
+            return NotFound(new { Message = $"Event with ID {eventId} not found." });
+        }
+
+        var seats = BuildSeatList(flight, 60);
+        return OkResponse(new EventSeatsResponse
+        {
+            EventId = eventId,
+            Seats = seats
+        });
     }
 
     private static EventSummaryDto MapToEventSummary(FlightTicketDto flight)
@@ -129,5 +160,73 @@ public sealed class EventsController : ApiControllerBase
             SeatsAvailable = flight.SeatsAvailable,
             AvailabilityStatus = flight.Status
         };
+    }
+
+    private static EventAvailabilityResponse MapToAvailability(FlightTicketDto flight)
+    {
+        const int totalSeats = 60;
+        var availableSeats = Math.Clamp(flight.SeatsAvailable, 0, totalSeats);
+        var soldSeats = totalSeats - availableSeats;
+
+        return new EventAvailabilityResponse
+        {
+            EventId = flight.Id,
+            TotalSeats = totalSeats,
+            AvailableSeats = availableSeats,
+            HeldSeats = 0,
+            SoldSeats = soldSeats,
+            AvailabilityStatus = flight.Status
+        };
+    }
+
+    private static EventSeatMapResponse BuildSeatMap(FlightTicketDto flight)
+    {
+        var seats = BuildSeatList(flight, 60);
+        var rows = seats
+            .Select((seat, index) => new { seat, index })
+            .GroupBy(pair => (pair.index / 6) + 1)
+            .Select(group => new EventSeatMapRowDto
+            {
+                RowNumber = group.Key,
+                Seats = group.Select(pair => pair.seat).ToList()
+            })
+            .ToList();
+
+        return new EventSeatMapResponse
+        {
+            EventId = flight.Id,
+            Layout = "3-3",
+            Rows = rows
+        };
+    }
+
+    private static IReadOnlyList<EventSeatDto> BuildSeatList(FlightTicketDto flight, int totalSeats)
+    {
+        var availableSeats = Math.Clamp(flight.SeatsAvailable, 0, totalSeats);
+        var soldSeats = totalSeats - availableSeats;
+        var seatLetters = new[] { "A", "B", "C", "D", "E", "F" };
+        var seats = new List<EventSeatDto>(totalSeats);
+        var soldCounter = 0;
+
+        for (var row = 1; row <= totalSeats / 6; row++)
+        {
+            foreach (var letter in seatLetters)
+            {
+                var status = soldCounter < soldSeats ? "sold" : "free";
+                if (status == "sold")
+                {
+                    soldCounter++;
+                }
+
+                seats.Add(new EventSeatDto
+                {
+                    SeatNumber = $"{row}{letter}",
+                    CabinClass = "Economy",
+                    Status = status
+                });
+            }
+        }
+
+        return seats;
     }
 }
