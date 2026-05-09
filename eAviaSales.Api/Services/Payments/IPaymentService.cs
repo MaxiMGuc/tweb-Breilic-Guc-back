@@ -1,15 +1,14 @@
-using eAviaSales.Api.Services.Orders;
+using eAviaSales.Api.Services;
 
 namespace eAviaSales.Api.Services.Payments;
 
 public interface IPaymentService
 {
-    OrderServiceResult<PaymentRecord> CreateIntent(string orderId);
+    ServiceResult<PaymentRecord> CreateIntent(string orderId);
 
-    OrderServiceResult<PaymentRecord> Confirm(string paymentId);
+    ServiceResult<PaymentRecord> Confirm(string paymentId);
 
     PaymentRecord? Get(string paymentId);
 
-    /// <summary>Apply external PSP status update (Idempotent).</summary>
-    OrderServiceResult<PaymentRecord> ApplyExternalStatus(string paymentId, string status);
+    ServiceResult<PaymentRecord> ApplyExternalStatus(string paymentId, string status);
 }
