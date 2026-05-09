@@ -8,7 +8,7 @@ public class AviaSalesDbContextFactory : IDesignTimeDbContextFactory<AviaSalesDb
     public AviaSalesDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<AviaSalesDbContext>();
-        optionsBuilder.UseSqlite("Data Source=eAviaSales_design.db");
+        optionsBuilder.UseSqlServer("Server=DESKTOP-1M9EUHS;Database=eAviaSales;Trusted_Connection=True;TrustServerCertificate=True;");
         return new AviaSalesDbContext(optionsBuilder.Options);
     }
 }

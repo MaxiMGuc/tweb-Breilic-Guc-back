@@ -1,4 +1,3 @@
-using eAviaSales.Api.Contracts.Common;
 using eAviaSales.Api.Contracts.Events;
 using eAviaSales.BusinessLogic.Interface;
 using eAviaSales.Domains.Models.Flight;
@@ -6,8 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace eAviaSales.Api.Controller;
 
+[ApiController]
 [Route("api/events")]
-public sealed class EventsController : ApiControllerBase
+public sealed class EventsController : ControllerBase
 {
     private readonly IFlightActions _flightActions;
     private readonly ILogger<EventsController> _logger;
@@ -18,9 +18,9 @@ public sealed class EventsController : ApiControllerBase
         _logger = logger;
     }
 
-    [ProducesResponseType(typeof(ApiResponse<EventsCatalogResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EventsCatalogResponse), StatusCodes.Status200OK)]
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<EventsCatalogResponse>>> GetEvents(
+    public async Task<ActionResult<EventsCatalogResponse>> GetEvents(
         [FromQuery] string fromIataCode,
         [FromQuery] string toIataCode,
         [FromQuery] DateTime departureDateUtc,
@@ -55,7 +55,7 @@ public sealed class EventsController : ApiControllerBase
             .Select(MapToEventSummary)
             .ToList();
 
-        return OkResponse(new EventsCatalogResponse
+        return Ok(new EventsCatalogResponse
         {
             Items = items,
             Page = page,
@@ -64,63 +64,61 @@ public sealed class EventsController : ApiControllerBase
         });
     }
 
-    [ProducesResponseType(typeof(ApiResponse<EventDetailsResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EventDetailsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpGet("{eventId:int}")]
-    public async Task<ActionResult<ApiResponse<EventDetailsResponse>>> GetEventById(int eventId)
+    public async Task<ActionResult<EventDetailsResponse>> GetEventById(int eventId)
     {
         var flight = await _flightActions.GetFlightByIdActionAsync(eventId);
         if (flight is null)
         {
-            return NotFound(new { Message = $"Event with ID {eventId} not found." });
+            return NotFound(new { message = $"Event with ID {eventId} not found." });
         }
 
-        return OkResponse(MapToEventDetails(flight));
+        return Ok(MapToEventDetails(flight));
     }
 
     [HttpGet("{eventId:int}/availability")]
-    [ProducesResponseType(typeof(ApiResponse<EventAvailabilityResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EventAvailabilityResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ApiResponse<EventAvailabilityResponse>>> GetAvailability(int eventId)
+    public async Task<ActionResult<EventAvailabilityResponse>> GetAvailability(int eventId)
     {
         var flight = await _flightActions.GetFlightByIdActionAsync(eventId);
         if (flight is null)
         {
-            return NotFound(new { Message = $"Event with ID {eventId} not found." });
+            return NotFound(new { message = $"Event with ID {eventId} not found." });
         }
 
-        var response = MapToAvailability(flight);
-        return OkResponse(response);
+        return Ok(MapToAvailability(flight));
     }
 
     [HttpGet("{eventId:int}/seat-map")]
-    [ProducesResponseType(typeof(ApiResponse<EventSeatMapResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EventSeatMapResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ApiResponse<EventSeatMapResponse>>> GetSeatMap(int eventId)
+    public async Task<ActionResult<EventSeatMapResponse>> GetSeatMap(int eventId)
     {
         var flight = await _flightActions.GetFlightByIdActionAsync(eventId);
         if (flight is null)
         {
-            return NotFound(new { Message = $"Event with ID {eventId} not found." });
+            return NotFound(new { message = $"Event with ID {eventId} not found." });
         }
 
-        var response = BuildSeatMap(flight);
-        return OkResponse(response);
+        return Ok(BuildSeatMap(flight));
     }
 
     [HttpGet("{eventId:int}/seats")]
-    [ProducesResponseType(typeof(ApiResponse<EventSeatsResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EventSeatsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ApiResponse<EventSeatsResponse>>> GetSeats(int eventId)
+    public async Task<ActionResult<EventSeatsResponse>> GetSeats(int eventId)
     {
         var flight = await _flightActions.GetFlightByIdActionAsync(eventId);
         if (flight is null)
         {
-            return NotFound(new { Message = $"Event with ID {eventId} not found." });
+            return NotFound(new { message = $"Event with ID {eventId} not found." });
         }
 
         var seats = BuildSeatList(flight, 60);
-        return OkResponse(new EventSeatsResponse
+        return Ok(new EventSeatsResponse
         {
             EventId = eventId,
             Seats = seats

@@ -2,36 +2,26 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace eAviaSales.Api.Controller;
 
+[ApiController]
 [Route("api/tickets")]
-public sealed class TicketsController : ApiControllerBase
+public sealed class TicketsController : ControllerBase
 {
     [HttpGet("{ticketId}")]
-    public IActionResult GetTicket(string ticketId)
-    {
-        return NotImplementedResponse($"Get ticket {ticketId}");
-    }
+    public IActionResult GetTicket(string ticketId) =>
+        ControllerNotImplemented.Feature($"Get ticket {ticketId}");
 
     [HttpGet("{ticketId}/qr")]
-    public IActionResult GetTicketQr(string ticketId)
-    {
-        return NotImplementedResponse($"Get ticket QR {ticketId}");
-    }
+    public IActionResult GetTicketQr(string ticketId) =>
+        ControllerNotImplemented.Feature($"Get ticket QR {ticketId}");
 
     [HttpPost("validate")]
-    public IActionResult ValidateTicket()
-    {
-        return NotImplementedResponse("Validate ticket");
-    }
+    public IActionResult ValidateTicket() => ControllerNotImplemented.Feature("Validate ticket");
 
     [HttpPost("{ticketId}/check-in")]
-    public IActionResult CheckInTicket(string ticketId)
-    {
-        return NotImplementedResponse($"Check-in ticket {ticketId}");
-    }
+    public IActionResult CheckInTicket(string ticketId) =>
+        ControllerNotImplemented.Feature($"Check-in ticket {ticketId}");
 
     [HttpGet("{ticketId}/validation-history")]
-    public IActionResult GetValidationHistory(string ticketId)
-    {
-        return NotImplementedResponse($"Validation history for ticket {ticketId}");
-    }
+    public IActionResult GetValidationHistory(string ticketId) =>
+        ControllerNotImplemented.Feature($"Validation history for ticket {ticketId}");
 }

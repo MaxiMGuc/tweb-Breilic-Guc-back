@@ -15,10 +15,10 @@ namespace eAviaSales.Data.Migrations
                 name: "Airlines",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Code = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,12 +29,12 @@ namespace eAviaSales.Data.Migrations
                 name: "Airports",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    IataCode = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    City = table.Column<string>(type: "TEXT", nullable: false),
-                    Country = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IataCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -45,14 +45,14 @@ namespace eAviaSales.Data.Migrations
                 name: "FareRules",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    FareTier = table.Column<int>(type: "INTEGER", nullable: false),
-                    CheckedBagsIncluded = table.Column<int>(type: "INTEGER", nullable: false),
-                    CarryOnWeightKg = table.Column<int>(type: "INTEGER", nullable: false),
-                    CheckedBagWeightKg = table.Column<int>(type: "INTEGER", nullable: false),
-                    PriceMultiplier = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Summary = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FareTier = table.Column<int>(type: "int", nullable: false),
+                    CheckedBagsIncluded = table.Column<int>(type: "int", nullable: false),
+                    CarryOnWeightKg = table.Column<int>(type: "int", nullable: false),
+                    CheckedBagWeightKg = table.Column<int>(type: "int", nullable: false),
+                    PriceMultiplier = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Summary = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -63,16 +63,16 @@ namespace eAviaSales.Data.Migrations
                 name: "Flights",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    FlightNumber = table.Column<string>(type: "TEXT", nullable: false),
-                    AirlineId = table.Column<int>(type: "INTEGER", nullable: false),
-                    BasePrice = table.Column<decimal>(type: "TEXT", nullable: false),
-                    CurrencyCode = table.Column<string>(type: "TEXT", nullable: false),
-                    SeatsAvailable = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FlightNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AirlineId = table.Column<int>(type: "int", nullable: false),
+                    BasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CurrencyCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SeatsAvailable = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -89,14 +89,14 @@ namespace eAviaSales.Data.Migrations
                 name: "Bookings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    FlightId = table.Column<int>(type: "INTEGER", nullable: false),
-                    FareTier = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "TEXT", nullable: false),
-                    CurrencyCode = table.Column<string>(type: "TEXT", nullable: false),
-                    BookedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FlightId = table.Column<int>(type: "int", nullable: false),
+                    FareTier = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CurrencyCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BookedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -113,14 +113,14 @@ namespace eAviaSales.Data.Migrations
                 name: "FlightSegments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    FlightId = table.Column<int>(type: "INTEGER", nullable: false),
-                    DepartureAirportId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ArrivalAirportId = table.Column<int>(type: "INTEGER", nullable: false),
-                    DepartureAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ArrivalAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    SegmentOrder = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FlightId = table.Column<int>(type: "int", nullable: false),
+                    DepartureAirportId = table.Column<int>(type: "int", nullable: false),
+                    ArrivalAirportId = table.Column<int>(type: "int", nullable: false),
+                    DepartureAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ArrivalAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SegmentOrder = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -149,13 +149,13 @@ namespace eAviaSales.Data.Migrations
                 name: "BookingPassengers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    BookingId = table.Column<int>(type: "INTEGER", nullable: false),
-                    FirstName = table.Column<string>(type: "TEXT", nullable: false),
-                    LastName = table.Column<string>(type: "TEXT", nullable: false),
-                    DateOfBirthUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    PassportNumber = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BookingId = table.Column<int>(type: "int", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateOfBirthUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PassportNumber = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
