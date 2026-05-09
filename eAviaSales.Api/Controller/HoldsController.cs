@@ -1,13 +1,12 @@
-using eAviaSales.Api.Contracts.Common;
-using eAviaSales.Api.Contracts.Errors;
 using eAviaSales.Api.Contracts.Holds;
 using eAviaSales.Api.Services.Holds;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eAviaSales.Api.Controller;
 
+[ApiController]
 [Route("api/events/{eventId:int}/holds")]
-public sealed class HoldsController : ApiControllerBase
+public sealed class HoldsController : ControllerBase
 {
     private readonly IHoldService _holdService;
     private readonly ILogger<HoldsController> _logger;
@@ -18,23 +17,18 @@ public sealed class HoldsController : ApiControllerBase
         _logger = logger;
     }
 
-    [ProducesResponseType(typeof(ApiResponse<CreateHoldResponse>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(CreateHoldResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [HttpPost]
-    public ActionResult<ApiResponse<CreateHoldResponse>> CreateHold(
-        int eventId,
-        [FromBody] CreateHoldRequest request)
+    public ActionResult<CreateHoldResponse> CreateHold(int eventId, [FromBody] CreateHoldRequest request)
     {
         var result = _holdService.Create(eventId, request.SeatNumbers, request.HoldMinutes);
         if (!result.Success || result.Hold is null)
         {
-            return Conflict(ApiResponse<object>.Fail(
-                new ApiError
-                {
-                    Code = ApiErrorCodes.HoldConflict,
-                    Message = $"One of the seats is already held: {result.ConflictSeat ?? "unknown"}."
-                },
-                HttpContext.TraceIdentifier));
+            return Conflict(new
+            {
+                message = $"One of the seats is already held: {result.ConflictSeat ?? "unknown"}."
+            });
         }
 
         _logger.LogInformation(
@@ -51,24 +45,18 @@ public sealed class HoldsController : ApiControllerBase
             ExpiresAtUtc = result.Hold.ExpiresAtUtc
         };
 
-        return StatusCode(StatusCodes.Status201Created, ApiResponse<CreateHoldResponse>.Ok(response, HttpContext.TraceIdentifier));
+        return StatusCode(StatusCodes.Status201Created, response);
     }
 
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpDelete("{holdId}")]
     public IActionResult DeleteHold(int eventId, string holdId)
     {
         var deleted = _holdService.Delete(eventId, holdId);
         if (!deleted)
         {
-            return NotFound(ApiResponse<object>.Fail(
-                new ApiError
-                {
-                    Code = ApiErrorCodes.HoldNotFound,
-                    Message = $"Hold {holdId} for event {eventId} was not found."
-                },
-                HttpContext.TraceIdentifier));
+            return NotFound(new { message = $"Hold {holdId} for event {eventId} was not found." });
         }
 
         _logger.LogInformation("Deleted hold {HoldId} for event {EventId}", holdId, eventId);

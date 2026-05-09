@@ -1,5 +1,4 @@
-using eAviaSales.Api.Contracts.Common;
-using eAviaSales.Api.Contracts.Errors;
+using Microsoft.AspNetCore.Mvc;
 
 namespace eAviaSales.Api.Middleware;
 
@@ -30,21 +29,17 @@ public sealed class GlobalExceptionMiddleware
             _logger.LogError(exception, "Unhandled exception for path {Path}", context.Request.Path);
 
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            context.Response.ContentType = "application/json";
+            context.Response.ContentType = "application/problem+json";
 
-            var message = _environment.IsDevelopment()
-                ? exception.Message
-                : "An unexpected server error occurred.";
+            var problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Title = "Server error",
+                Detail = _environment.IsDevelopment() ? exception.Message : "An unexpected error occurred.",
+                Type = "https://httpstatuses.com/500"
+            };
 
-            var response = ApiResponse<object>.Fail(
-                new ApiError
-                {
-                    Code = ApiErrorCodes.InternalServerError,
-                    Message = message
-                },
-                context.TraceIdentifier);
-
-            await context.Response.WriteAsJsonAsync(response);
+            await context.Response.WriteAsJsonAsync(problem);
         }
     }
 }

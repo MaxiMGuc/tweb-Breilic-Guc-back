@@ -1,25 +1,62 @@
+using eAviaSales.Api.Contracts.Payments;
+using eAviaSales.Api.Contracts.Webhooks;
+using eAviaSales.Api.Services.Payments;
+using eAviaSales.Api.Services.Refunds;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eAviaSales.Api.Controller;
 
+[ApiController]
 [Route("api/webhooks")]
-public sealed class WebhooksController : ApiControllerBase
+public sealed class WebhooksController : ControllerBase
 {
-    [HttpPost("payments")]
-    public IActionResult HandlePaymentWebhook()
+    private readonly IPaymentService _paymentService;
+    private readonly IRefundService _refundService;
+
+    public WebhooksController(IPaymentService paymentService, IRefundService refundService)
     {
-        return NotImplementedResponse("Payment webhook");
+        _paymentService = paymentService;
+        _refundService = refundService;
     }
 
-    [HttpPost("refunds")]
-    public IActionResult HandleRefundWebhook()
+    [ProducesResponseType(typeof(PaymentDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [HttpPost("payments")]
+    public ActionResult<PaymentDetailsResponse> HandlePaymentWebhook([FromBody] PaymentWebhookPayload body)
     {
-        return NotImplementedResponse("Refund webhook");
+        var result = _paymentService.ApplyExternalStatus(body.PaymentId, body.Status);
+        if (!result.Success)
+        {
+            return BadRequest(new
+            {
+                message = result.Message ?? "Webhook could not apply payment status."
+            });
+        }
+
+        return Ok(ToDetails(result.Value!));
+    }
+
+    [ProducesResponseType(typeof(WebhookAcceptedDto), StatusCodes.Status200OK)]
+    [HttpPost("refunds")]
+    public ActionResult<WebhookAcceptedDto> HandleRefundWebhook([FromBody] RefundWebhookPayload body)
+    {
+        _refundService.UpsertStatusFromWebhook(body.RefundId, body.Status);
+        return Ok(new WebhookAcceptedDto());
     }
 
     [HttpPost("notifications/delivery")]
     public IActionResult HandleNotificationDeliveryWebhook()
     {
-        return NotImplementedResponse("Notification delivery webhook");
+        return ControllerNotImplemented.Feature("Notification delivery webhook");
     }
+
+    private static PaymentDetailsResponse ToDetails(PaymentRecord r) =>
+        new PaymentDetailsResponse
+        {
+            PaymentId = r.PaymentId,
+            OrderId = r.OrderId,
+            Amount = r.Amount,
+            CurrencyCode = r.CurrencyCode,
+            Status = r.Status
+        };
 }

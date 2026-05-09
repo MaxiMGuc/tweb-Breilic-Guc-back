@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace eAviaSales.Api.Controller;
 
+[ApiController]
 [Route("api/auth")]
-public class AuthController : ApiControllerBase
+public class AuthController : ControllerBase
 {
     private readonly IAuthActions _authActions;
     private readonly ILogger<AuthController> _logger;
@@ -27,7 +28,7 @@ public class AuthController : ApiControllerBase
         if (response is null)
         {
             _logger.LogWarning("Login failed for user {Login}", request.Login);
-            return Unauthorized(new { Message = "Invalid credentials payload." });
+            return Unauthorized(new { message = "Invalid credentials payload." });
         }
 
         _logger.LogInformation("Login succeeded for user {Login}", request.Login);
@@ -37,18 +38,18 @@ public class AuthController : ApiControllerBase
     [HttpPost("register")]
     public IActionResult Register()
     {
-        return NotImplementedResponse("Register");
+        return ControllerNotImplemented.Feature("Register");
     }
 
     [HttpPost("refresh")]
     public IActionResult RefreshToken()
     {
-        return NotImplementedResponse("Refresh token");
+        return ControllerNotImplemented.Feature("Refresh token");
     }
 
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        return NotImplementedResponse("Logout");
+        return ControllerNotImplemented.Feature("Logout");
     }
 }
