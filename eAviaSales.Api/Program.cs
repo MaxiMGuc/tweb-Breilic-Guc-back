@@ -2,12 +2,18 @@ using eAviaSales.Data;
 using eAviaSales.BusinessLogic.Functions.Auth;
 using eAviaSales.BusinessLogic.Functions.Flights;
 using eAviaSales.BusinessLogic.Interface;
-using eAviaSales.Api.Extensions;
 using eAviaSales.Api.Middleware;
+using eAviaSales.Api.Services.Cart;
+using eAviaSales.Api.Services.Holds;
+using eAviaSales.Api.Services.Orders;
+using eAviaSales.Api.Services.Payments;
+using eAviaSales.Api.Services.Refunds;
+using eAviaSales.Api.Services.Ticketing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -26,13 +32,22 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContext<AviaSalesDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
 builder.Services.AddScoped<IAuthActions, AuthFlow>();
 builder.Services.AddScoped<IFlightActions, FlightFlow>();
-builder.Services.AddTicketingModuleScaffolding();
+
+// In-memory ticketing (cart, holds, orders, payments) — one store for the student demo
+builder.Services.AddSingleton<TicketingMemoryStore>();
+builder.Services.AddSingleton<ICartService>(sp => sp.GetRequiredService<TicketingMemoryStore>());
+builder.Services.AddSingleton<IHoldService>(sp => sp.GetRequiredService<TicketingMemoryStore>());
+builder.Services.AddSingleton<IOrderService>(sp => sp.GetRequiredService<TicketingMemoryStore>());
+builder.Services.AddSingleton<IPaymentService>(sp => sp.GetRequiredService<TicketingMemoryStore>());
+builder.Services.AddSingleton<IRefundService>(sp => sp.GetRequiredService<TicketingMemoryStore>());
 
 var app = builder.Build();
 
